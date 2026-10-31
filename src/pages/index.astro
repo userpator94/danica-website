@@ -1,3 +1,15 @@
 ---
-return Astro.redirect('/sr/', 302);
+// Fallback for hosts without _redirects. Cloudflare uses public/_redirects (HTTP 302).
 ---
+<!doctype html>
+<html lang="sr">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0;url=/sr/" />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="https://danicafilipovic.com/sr/" />
+    <title>Danica Filipović</title>
+    <script is:inline>location.replace('/sr/');</script>
+  </head>
+  <body></body>
+</html>
