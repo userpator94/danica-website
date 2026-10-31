@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Locale } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const p = t.privacy;
+---
+
+<BaseLayout locale={locale} page="privacy" title={p.metaTitle} description={p.metaDescription}>
+  <section class="page-hero">
+    <div class="container">
+      <h1>{p.title}</h1>
+      <p>{p.updated}</p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container privacy">
+      {
+        p.sections.map((section) => (
+          <article class="privacy__block">
+            <h2>{section.title}</h2>
+            <p>{section.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .privacy {
+    max-width: 42rem;
+  }
+
+  .privacy__block {
+    margin-bottom: var(--space-6);
+  }
+
+  .privacy__block h2 {
+    font-size: 1.35rem;
+  }
+</style>

@@ -1,0 +1,211 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import type { Locale } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
+import { getPath } from '../i18n/routes';
+import danicaPhoto from '../assets/danica-photo.png';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const h = t.home;
+---
+
+<BaseLayout locale={locale} page="home" title={h.metaTitle} description={h.metaDescription}>
+  <section class="hero section">
+    <div class="container hero__grid">
+      <div>
+        <p class="eyebrow">{t.meta.siteName}</p>
+        <h1>{h.hero.headline}</h1>
+        <p class="hero__support">{h.hero.support}</p>
+        <div class="hero__actions">
+          <a class="btn btn--book" href={getPath(locale, 'contact')}>{h.hero.primaryCta}</a>
+        </div>
+        <p class="hero__routes">{h.hero.routes}</p>
+      </div>
+      <div class="portrait">
+        <Image
+          src={danicaPhoto}
+          alt={h.hero.imageAlt}
+          widths={[400, 560, 800, 1120]}
+          sizes="(max-width: 899px) 100vw, 28rem"
+          quality={85}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" id="paths">
+    <div class="container">
+      <h2>{h.paths.title}</h2>
+      <p class="section__intro">{h.paths.intro}</p>
+      <div class="card-grid card-grid--2">
+        <article class="card">
+          <h3>{h.paths.degree.title}</h3>
+          <p>{h.paths.degree.body}</p>
+          <a class="card__link" href={`${getPath(locale, 'services')}#degree`}>{h.paths.degree.cta}</a>
+        </article>
+        <article class="card">
+          <h3>{h.paths.erasmus.title}</h3>
+          <p>{h.paths.erasmus.body}</p>
+          <a class="card__link" href={`${getPath(locale, 'services')}#erasmus`}>{h.paths.erasmus.cta}</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>{h.help.title}</h2>
+      <p class="section__intro">{h.help.intro}</p>
+      <div class="card-grid card-grid--4">
+        {
+          h.help.items.map((item) => (
+            <article class="card">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <a class="card__link" href={getPath(locale, 'services')}>
+                {t.common.learnMore}
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container meet">
+      <div>
+        <h2>{h.meet.title}</h2>
+        <p>{h.meet.body}</p>
+        <a class="btn btn--secondary" href={getPath(locale, 'about')}>{h.meet.cta}</a>
+      </div>
+      <div>
+        <ul class="list-check">
+          {h.meet.experience.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>{h.process.title}</h2>
+      <p class="section__intro">{h.process.intro}</p>
+      <div class="steps">
+        {
+          h.process.steps.map((step) => (
+            <article class="step">
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <h2>{h.pricing.title}</h2>
+      <p class="section__intro">{h.pricing.intro}</p>
+      <div class="card-grid card-grid--2">
+        {
+          h.pricing.items.map((item) => (
+            <article class="card">
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+              <span class="card__link">{t.common.requestQuote}</span>
+            </article>
+          ))
+        }
+      </div>
+      <p style="margin-top: 2rem;">
+        <a class="btn btn--primary" href={getPath(locale, 'services')}>{h.pricing.cta}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>{h.faq.title}</h2>
+      <div class="faq">
+        {
+          h.faq.items.map((item) => (
+            <details>
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <CtaBand
+        title={h.finalCta.headline}
+        body={h.finalCta.support}
+        ctaLabel={h.finalCta.cta}
+        ctaHref={getPath(locale, 'contact')}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-top: var(--space-7);
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+  }
+
+  @media (min-width: 900px) {
+    .hero__grid {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--space-7);
+    }
+  }
+
+  .hero__support {
+    font-size: 1.2rem;
+    color: var(--color-text-muted);
+    max-width: 36rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__routes {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .meet {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 800px) {
+    .meet {
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: start;
+    }
+  }
+</style>

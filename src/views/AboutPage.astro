@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import type { Locale } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
+import { getPath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const a = t.about;
+---
+
+<BaseLayout locale={locale} page="about" title={a.metaTitle} description={a.metaDescription}>
+  <section class="page-hero">
+    <div class="container">
+      <h1>{a.title}</h1>
+      <p>{a.intro}</p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container about-grid">
+      <div class="about-story">
+        {
+          a.sections.map((section) => (
+            <article class="about-block">
+              <h2>{section.title}</h2>
+              <p>{section.body}</p>
+            </article>
+          ))
+        }
+      </div>
+      <aside class="card about-aside">
+        <h2>{a.experienceTitle}</h2>
+        <ul class="list-check">
+          {a.experience.map((item) => <li>{item}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <CtaBand
+        title={a.ctaTitle}
+        body={a.ctaBody}
+        ctaLabel={a.cta}
+        ctaHref={getPath(locale, 'contact')}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-grid {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: 1.4fr 0.8fr;
+      align-items: start;
+    }
+  }
+
+  .about-block {
+    margin-bottom: var(--space-6);
+  }
+
+  .about-block h2 {
+    font-size: 1.5rem;
+  }
+
+  .about-aside h2 {
+    font-size: 1.35rem;
+  }
+</style>

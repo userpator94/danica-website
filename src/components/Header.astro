@@ -1,0 +1,241 @@
+---
+import type { Locale } from '../i18n/config';
+import type { PageKey } from '../i18n/routes';
+import { getPath } from '../i18n/routes';
+import { getDictionary } from '../i18n/dictionaries';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface Props {
+  locale: Locale;
+  page: PageKey;
+}
+
+const { locale, page } = Astro.props;
+const t = getDictionary(locale);
+
+const links: Array<{ key: PageKey; label: string }> = [
+  { key: 'about', label: t.nav.about },
+  { key: 'services', label: t.nav.services },
+  { key: 'contact', label: t.nav.contact },
+];
+---
+
+<header class="header">
+  <div class="container header__inner">
+    <a class="header__brand" href={getPath(locale, 'home')}>{t.meta.siteName}</a>
+
+    <nav class="header__nav" aria-label="Primary">
+      <ul class="header__links">
+        {
+          links.map((link) => (
+            <li>
+              <a
+                href={getPath(locale, link.key)}
+                aria-current={page === link.key ? 'page' : undefined}
+                class:list={['header__link', { 'header__link--active': page === link.key }]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <LanguageSwitcher locale={locale} page={page} />
+      <a class="btn btn--book header__cta" href={getPath(locale, 'contact')}>
+        {t.nav.bookConsultation}
+      </a>
+      <button
+        class="header__toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        data-menu-toggle
+      >
+        <span class="visually-hidden" data-menu-label-open>{t.nav.openMenu}</span>
+        <span class="visually-hidden" data-menu-label-close hidden>{t.nav.closeMenu}</span>
+        <span aria-hidden="true" class="header__toggle-bars"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="header__mobile container" id="mobile-nav" hidden data-mobile-nav>
+    <ul class="header__mobile-links">
+      {
+        links.map((link) => (
+          <li>
+            <a href={getPath(locale, link.key)}>{link.label}</a>
+          </li>
+        ))
+      }
+      <li>
+        <a class="btn btn--book" href={getPath(locale, 'contact')}>{t.nav.bookConsultation}</a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector('[data-menu-toggle]');
+  const panel = document.querySelector('[data-mobile-nav]');
+  const openLabel = document.querySelector('[data-menu-label-open]');
+  const closeLabel = document.querySelector('[data-menu-label-close]');
+
+  toggle?.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!expanded));
+    if (panel instanceof HTMLElement) {
+      panel.hidden = expanded;
+    }
+    openLabel?.toggleAttribute('hidden', !expanded);
+    closeLabel?.toggleAttribute('hidden', expanded);
+  });
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(241, 238, 231, 0.9);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: var(--header-height);
+  }
+
+  .header__brand {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-forest);
+    text-decoration: none;
+    white-space: nowrap;
+    margin-right: auto;
+  }
+
+  .header__brand:hover {
+    color: var(--color-terracotta);
+  }
+
+  .header__nav {
+    display: none;
+  }
+
+  .header__links {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__link {
+    display: inline-block;
+    padding: 0.5rem 0.75rem;
+    color: var(--color-forest);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 0.375rem;
+  }
+
+  .header__link:hover,
+  .header__link--active {
+    background: rgba(38, 60, 53, 0.06);
+    color: var(--color-forest);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .header__cta {
+    display: none;
+  }
+
+  .header__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-white);
+    cursor: pointer;
+  }
+
+  .header__toggle-bars,
+  .header__toggle-bars::before,
+  .header__toggle-bars::after {
+    display: block;
+    width: 1.15rem;
+    height: 2px;
+    background: var(--color-forest);
+    border-radius: 1px;
+    position: relative;
+  }
+
+  .header__toggle-bars::before,
+  .header__toggle-bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+  }
+
+  .header__toggle-bars::before {
+    top: -6px;
+  }
+
+  .header__toggle-bars::after {
+    top: 6px;
+  }
+
+  .header__mobile {
+    padding-bottom: 1.25rem;
+  }
+
+  .header__mobile-links {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .header__mobile-links a {
+    display: block;
+    padding: 0.75rem 0.25rem;
+    color: var(--color-forest);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  @media (min-width: 960px) {
+    .header__nav {
+      display: block;
+    }
+
+    .header__cta {
+      display: inline-flex;
+      min-height: 2.75rem;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.95rem;
+    }
+
+    .header__toggle,
+    .header__mobile {
+      display: none;
+    }
+  }
+</style>

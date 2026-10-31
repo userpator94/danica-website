@@ -1,0 +1,60 @@
+---
+import '@fontsource/source-serif-4/400.css';
+import '@fontsource/source-serif-4/600.css';
+import '@fontsource/source-sans-3/400.css';
+import '@fontsource/source-sans-3/600.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import type { Locale } from '../i18n/config';
+import { htmlLang, hreflang, defaultLocale } from '../i18n/config';
+import type { PageKey } from '../i18n/routes';
+import { getAlternatePaths, getPath } from '../i18n/routes';
+import { getDictionary } from '../i18n/dictionaries';
+
+interface Props {
+  locale: Locale;
+  page: PageKey;
+  title: string;
+  description: string;
+}
+
+const { locale, page, title, description } = Astro.props;
+const t = getDictionary(locale);
+const alternates = getAlternatePaths(page);
+const canonical = new URL(getPath(locale, page), Astro.site).href;
+const fullTitle = `${title} · ${t.meta.siteName}`;
+---
+
+<!doctype html>
+<html lang={htmlLang[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={hreflang.sr} href={new URL(alternates.sr, Astro.site).href} />
+    <link rel="alternate" hreflang={hreflang.en} href={new URL(alternates.en, Astro.site).href} />
+    <link rel="alternate" hreflang={hreflang.sl} href={new URL(alternates.sl, Astro.site).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alternates[defaultLocale], Astro.site).href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={htmlLang[locale].replace('-', '_')} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header locale={locale} page={page} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>

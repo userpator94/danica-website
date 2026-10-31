@@ -1,0 +1,116 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import type { Locale } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
+import { getPath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const s = t.services;
+const process = t.howItWorks;
+---
+
+<BaseLayout locale={locale} page="services" title={s.metaTitle} description={s.metaDescription}>
+  <section class="page-hero">
+    <div class="container">
+      <h1>{s.title}</h1>
+      <p>{s.intro}</p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <h2>{s.routesTitle}</h2>
+      <div class="card-grid card-grid--2" style="margin-top: 1.5rem;">
+        <article class="card" id="degree">
+          <h3>{s.degree.title}</h3>
+          <p>{s.degree.body}</p>
+        </article>
+        <article class="card" id="erasmus">
+          <h3>{s.erasmus.title}</h3>
+          <p>{s.erasmus.body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" id="how-it-works">
+    <div class="container">
+      <h2>{process.title}</h2>
+      <p class="section__intro">{process.intro}</p>
+      <div class="steps">
+        {
+          process.steps.map((step) => (
+            <article class="step card">
+              <h3>{step.title}</h3>
+              <p>{step.body}</p>
+            </article>
+          ))
+        }
+      </div>
+      <article class="card" style="margin-top: 2rem;">
+        <h3>{process.afterTitle}</h3>
+        <p>{process.afterBody}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>{s.listTitle}</h2>
+      <div class="service-list">
+        {
+          s.items.map((item) => (
+            <article class="card service-item">
+              <h3>{item.title}</h3>
+              <p class="service-item__for">{item.forWhom}</p>
+              <p>{item.body}</p>
+              <p class="service-item__outcome">{item.outcome}</p>
+              <a class="btn btn--secondary" href={getPath(locale, 'contact')}>
+                {t.common.requestQuote}
+              </a>
+            </article>
+          ))
+        }
+      </div>
+      <p class="disclaimer">{s.disclaimer}</p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <CtaBand
+        title={s.ctaTitle}
+        body={s.ctaBody}
+        ctaLabel={s.cta}
+        ctaHref={getPath(locale, 'contact')}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .service-list {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-5);
+  }
+
+  .service-item__for {
+    font-weight: 600;
+    color: var(--color-forest) !important;
+  }
+
+  .service-item__outcome {
+    font-size: 0.95rem;
+  }
+
+  .service-item .btn {
+    margin-top: var(--space-4);
+  }
+</style>

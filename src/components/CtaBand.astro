@@ -1,0 +1,70 @@
+---
+import { Image } from 'astro:assets';
+import ljubljana from '../assets/ljubljana.jpg';
+
+interface Props {
+  title: string;
+  body: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
+const { title, body, ctaLabel, ctaHref } = Astro.props;
+---
+
+<div class="cta-band cta-band--scene">
+  <Image
+    class="cta-band__photo"
+    src={ljubljana}
+    alt=""
+    widths={[800, 1200, 1600]}
+    sizes="100vw"
+    quality={75}
+    aria-hidden="true"
+  />
+  <div class="cta-band__overlay" aria-hidden="true"></div>
+  <div class="cta-band__content">
+    <h2>{title}</h2>
+    <p>{body}</p>
+    <a class="btn btn--book" href={ctaHref}>{ctaLabel}</a>
+  </div>
+</div>
+
+<style>
+  .cta-band--scene {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--color-forest);
+  }
+
+  .cta-band__photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    opacity: 0.42;
+  }
+
+  .cta-band__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(
+        160deg,
+        rgba(38, 60, 53, 0.82) 0%,
+        rgba(38, 60, 53, 0.72) 45%,
+        rgba(26, 42, 37, 0.78) 100%
+      ),
+      linear-gradient(180deg, rgba(241, 238, 231, 0.12), transparent 55%);
+  }
+
+  .cta-band__content {
+    position: relative;
+    z-index: 2;
+  }
+</style>

@@ -1,0 +1,181 @@
+---
+import type { Locale } from '../i18n/config';
+import { locales, localeLabels, localeCodes } from '../i18n/config';
+import type { PageKey } from '../i18n/routes';
+import { getPath } from '../i18n/routes';
+import { getDictionary } from '../i18n/dictionaries';
+
+interface Props {
+  locale: Locale;
+  page: PageKey;
+}
+
+const { locale, page } = Astro.props;
+const t = getDictionary(locale);
+const menuId = 'lang-menu';
+---
+
+<div class="lang" data-lang-switcher>
+  <button
+    type="button"
+    class="lang__trigger"
+    aria-expanded="false"
+    aria-haspopup="listbox"
+    aria-controls={menuId}
+    data-lang-trigger
+  >
+    <span class="lang__code">{localeCodes[locale]}</span>
+    <span class="lang__name">{localeLabels[locale]}</span>
+    <span class="lang__chevron" aria-hidden="true"></span>
+    <span class="visually-hidden">{t.nav.language}</span>
+  </button>
+
+  <ul class="lang__menu" id={menuId} role="listbox" hidden data-lang-menu>
+    {
+      locales.map((loc) => (
+        <li role="option" aria-selected={loc === locale}>
+          <a
+            href={getPath(loc, page)}
+            hreflang={loc === 'sr' ? 'sr-Latn' : loc}
+            lang={loc === 'sr' ? 'sr-Latn' : loc}
+            class:list={['lang__option', { 'lang__option--active': loc === locale }]}
+            data-lang-option
+          >
+            <span class="lang__code">{localeCodes[loc]}</span>
+            <span class="lang__name">{localeLabels[loc]}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  function initLangSwitcher(root: Element) {
+    const trigger = root.querySelector('[data-lang-trigger]');
+    const menu = root.querySelector('[data-lang-menu]');
+    if (!(trigger instanceof HTMLButtonElement) || !(menu instanceof HTMLElement)) return;
+
+    const setOpen = (open: boolean) => {
+      trigger.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+    };
+
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target as Node)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    });
+  }
+
+  document.querySelectorAll('[data-lang-switcher]').forEach(initLangSwitcher);
+</script>
+
+<style>
+  .lang {
+    position: relative;
+  }
+
+  .lang__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-white);
+    color: var(--color-forest);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .lang__trigger:hover {
+    border-color: rgba(38, 60, 53, 0.28);
+  }
+
+  .lang__chevron {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    opacity: 0.7;
+  }
+
+  .lang__trigger[aria-expanded='true'] .lang__chevron {
+    transform: rotate(225deg) translateY(-1px);
+  }
+
+  .lang__menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 60;
+    min-width: 11rem;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 0.65rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .lang__option {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.4rem;
+    color: var(--color-forest);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .lang__option:hover {
+    background: rgba(38, 60, 53, 0.06);
+    color: var(--color-forest);
+  }
+
+  .lang__option--active {
+    background: var(--color-forest);
+    color: var(--color-ivory);
+  }
+
+  .lang__option--active:hover {
+    background: var(--color-forest-deep);
+    color: var(--color-ivory);
+  }
+
+  .lang__code {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+
+  .lang__option--active .lang__code {
+    opacity: 0.9;
+  }
+
+  @media (max-width: 719px) {
+    .lang__trigger .lang__name {
+      display: none;
+    }
+
+    .lang__trigger .lang__code {
+      opacity: 1;
+      font-size: 0.8125rem;
+    }
+  }
+</style>

@@ -1,0 +1,199 @@
+---
+import type { Locale } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
+import { getPath } from '../i18n/routes';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const f = t.contact.form;
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY ?? '';
+---
+
+<form class="form" data-contact-form novalidate>
+  <input type="hidden" name="access_key" value={accessKey} />
+  <input type="hidden" name="subject" value={`Consultation inquiry (${locale.toUpperCase()})`} />
+  <input type="checkbox" name="botcheck" class="form__honeypot" tabindex="-1" autocomplete="off" />
+
+  <div class="form__row">
+    <label for="name">{f.name}</label>
+    <input id="name" name="name" type="text" autocomplete="name" required />
+    <p class="form__error" data-error-for="name" hidden></p>
+  </div>
+
+  <div class="form__row">
+    <label for="email">{f.email}</label>
+    <input id="email" name="email" type="email" autocomplete="email" required />
+    <p class="form__error" data-error-for="email" hidden></p>
+  </div>
+
+  <div class="form__row">
+    <label for="country">{f.country}</label>
+    <input id="country" name="country" type="text" autocomplete="country-name" />
+  </div>
+
+  <div class="form__row">
+    <label for="goal">{f.goal}</label>
+    <select id="goal" name="goal" required>
+      <option value=""></option>
+      {f.goalOptions.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+    </select>
+    <p class="form__error" data-error-for="goal" hidden></p>
+    <p class="form__hint" data-erasmus-note hidden>{f.erasmusNote}</p>
+  </div>
+
+  <div class="form__row">
+    <label for="period">{f.period}</label>
+    <input id="period" name="period" type="text" />
+  </div>
+
+  <div class="form__row">
+    <label for="supportType">{f.supportType}</label>
+    <select id="supportType" name="supportType" required>
+      <option value=""></option>
+      {f.supportOptions.map((opt) => <option value={opt.value}>{opt.label}</option>)}
+    </select>
+    <p class="form__error" data-error-for="supportType" hidden></p>
+  </div>
+
+  <div class="form__row">
+    <label for="message">{f.message}</label>
+    <textarea id="message" name="message" required></textarea>
+    <p class="form__error" data-error-for="message" hidden></p>
+  </div>
+
+  <div class="form__row">
+    <label class="form__consent">
+      <input id="consent" name="consent" type="checkbox" value="yes" required />
+      <span>
+        {f.consent}
+        {' '}
+        <a href={getPath(locale, 'privacy')}>{getDictionary(locale).footer.privacy}</a>
+      </span>
+    </label>
+    <p class="form__error" data-error-for="consent" hidden></p>
+  </div>
+
+  <button class="btn btn--primary" type="submit" data-submit>
+    {f.submit}
+  </button>
+
+  <p class="form__status form__status--success" data-success hidden>{f.success}</p>
+  <p class="form__status form__status--error" data-error hidden>{f.error}</p>
+</form>
+
+<script define:vars={{ requiredMsg: f.required, invalidEmailMsg: f.invalidEmail, sendingLabel: f.sending, submitLabel: f.submit }}>
+  const form = document.querySelector('[data-contact-form]');
+  if (!(form instanceof HTMLFormElement)) {
+    // no-op
+  } else {
+    const submitBtn = form.querySelector('[data-submit]');
+    const successEl = form.querySelector('[data-success]');
+    const errorEl = form.querySelector('[data-error]');
+    const goalSelect = form.querySelector('#goal');
+    const supportSelect = form.querySelector('#supportType');
+    const erasmusNote = form.querySelector('[data-erasmus-note]');
+    const packageOption =
+      supportSelect instanceof HTMLSelectElement
+        ? supportSelect.querySelector('option[value="package"]')
+        : null;
+
+    function syncErasmus() {
+      const isErasmus = goalSelect instanceof HTMLSelectElement && goalSelect.value === 'erasmus';
+      if (erasmusNote instanceof HTMLElement) erasmusNote.hidden = !isErasmus;
+      if (packageOption instanceof HTMLOptionElement) {
+        packageOption.disabled = isErasmus;
+        packageOption.hidden = isErasmus;
+      }
+      if (
+        isErasmus &&
+        supportSelect instanceof HTMLSelectElement &&
+        supportSelect.value === 'package'
+      ) {
+        supportSelect.value = 'consultation';
+      }
+    }
+
+    if (goalSelect instanceof HTMLSelectElement) {
+      goalSelect.addEventListener('change', syncErasmus);
+    }
+    form.addEventListener('reset', () => {
+      setTimeout(syncErasmus, 0);
+    });
+
+    function clearErrors() {
+      form.querySelectorAll('[data-error-for]').forEach((el) => {
+        el.hidden = true;
+        el.textContent = '';
+      });
+      if (successEl instanceof HTMLElement) successEl.hidden = true;
+      if (errorEl instanceof HTMLElement) errorEl.hidden = true;
+    }
+
+    function showFieldError(name, message) {
+      const el = form.querySelector(`[data-error-for="${name}"]`);
+      if (el instanceof HTMLElement) {
+        el.hidden = false;
+        el.textContent = message;
+      }
+    }
+
+    function validate() {
+      clearErrors();
+      let ok = true;
+      const data = new FormData(form);
+
+      const required = ['name', 'email', 'goal', 'supportType', 'message', 'consent'];
+      for (const field of required) {
+        const value = data.get(field);
+        if (!value || (typeof value === 'string' && !value.trim())) {
+          showFieldError(field, requiredMsg);
+          ok = false;
+        }
+      }
+
+      const email = String(data.get('email') ?? '');
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('email', invalidEmailMsg);
+        ok = false;
+      }
+
+      return ok;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!validate()) return;
+
+      if (submitBtn instanceof HTMLButtonElement) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = sendingLabel;
+      }
+
+      try {
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: new FormData(form),
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          if (successEl instanceof HTMLElement) successEl.hidden = false;
+          form.reset();
+        } else {
+          throw new Error('submit failed');
+        }
+      } catch {
+        if (errorEl instanceof HTMLElement) errorEl.hidden = false;
+      } finally {
+        if (submitBtn instanceof HTMLButtonElement) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = submitLabel;
+        }
+      }
+    });
+  }
+</script>
