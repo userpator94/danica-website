@@ -4,11 +4,11 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://danicafilipovic.com',
+  site: 'https://studiranjeusloveniji.com',
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith('danicafilipovic.com/') && !page.endsWith('danicafilipovic.com'),
+      filter: (page) => !page.endsWith('studiranjeusloveniji.com/') && !page.endsWith('studiranjeusloveniji.com'),
       i18n: {
         defaultLocale: 'sr',
         locales: {
